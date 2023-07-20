@@ -9,6 +9,8 @@ class Agent4 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
     private Random rand = new Random();
     private Environment env;
+    private int stepsTaken = 0;
+    private int successfulCaptures = 0;
 
     public Agent4(Environment env, int startNode) {
         super(startNode);
@@ -23,6 +25,9 @@ class Agent4 extends Agent {
 
     @Override
     public boolean capture(Target target) {
+        // Increment steps taken
+        stepsTaken++;
+
         // Find the node(s) with the highest belief
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -40,9 +45,12 @@ class Agent4 extends Agent {
         int examinedNode = bestNodes.get(rand.nextInt(bestNodes.size()));
 
         // Update belief state based on the result of examining the node
-        if (target.getCurrentNode() == examinedNode) {
+        boolean captured = target.getCurrentNode() == examinedNode;
+        if (captured) {
             Arrays.fill(beliefState, 0);
             beliefState[examinedNode] = 1;
+            // Increment successful captures
+            successfulCaptures++;
             return true;
         } else {
             beliefState[examinedNode] = 0;
@@ -52,5 +60,13 @@ class Agent4 extends Agent {
             }
             return false;
         }
+    }
+
+    public int getStepsTaken() {
+        return stepsTaken;
+    }
+
+    public int getSuccessfulCaptures() {
+        return successfulCaptures;
     }
 }

@@ -11,12 +11,12 @@ public class Main {
 
         // Initialize the agents
         List<Agent> agents = new ArrayList<>();
-        agents.add(new Agent0(new Random().nextInt(40) + 1));
-        agents.add(new Agent1(new Random().nextInt(40) + 1));
-        agents.add(new Agent2(new Random().nextInt(40) + 1));
-        agents.add(new Agent3(env, new Random().nextInt(40) + 1, new Random().nextInt(40) + 1));
-        agents.add(new Agent4(env, new Random().nextInt(40) + 1));
-        agents.add(new Agent5(env, new Random().nextInt(40) + 1));
+        //agents.add(new Agent0(new Random().nextInt(40) + 1));
+        //agents.add(new Agent1(new Random().nextInt(40) + 1));
+        //agents.add(new Agent2(new Random().nextInt(40) + 1));
+        //agents.add(new Agent3(env, new Random().nextInt(40) + 1, new Random().nextInt(40) + 1));
+        //agents.add(new Agent4(env, new Random().nextInt(40) + 1));
+        //agents.add(new Agent5(env, new Random().nextInt(40) + 1));
         agents.add(new Agent6(new Random().nextInt(40) + 1));
         agents.add(new Agent7(new Random().nextInt(40) + 1));
 
@@ -31,10 +31,22 @@ public class Main {
                 agent.move(env, target);
                 if (agent.capture(target)) {
                     System.out.println("Target captured by " + agent.getClass().getSimpleName());
+                    agent.incrementSuccessfulCaptures(); // Assuming you have this method
                     gameOver = true;
                     break;
                 }
+                agent.incrementStepsTaken(); // Assuming you have this method
             }
+        }
+
+        // Print performance of each agent
+        for (int i = 0; i < agents.size(); i++) {
+            Agent agent = agents.get(i);
+            System.out.println("Performance of " + agent.getClass().getSimpleName() + ":");
+            System.out.println("Steps to capture target: " + agent.getStepsTaken()); // Assuming you have this method
+            System.out.println("Number of successful captures: " + agent.getSuccessfulCaptures()); // Assuming you have this method
+            System.out.println("Number of steps taken by the target: " + target.getStepsTaken());
+            System.out.println();
         }
     }
 }

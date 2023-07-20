@@ -7,6 +7,8 @@ class Agent5 extends Agent {
     private Set<Integer> visitedNodes = new HashSet<>();
     private Random rand = new Random();
     private Environment env;
+    private int stepsTaken = 0;
+    private int successfulCaptures = 0;
 
     public Agent5(Environment env, int startNode) {
         super(startNode);
@@ -22,6 +24,9 @@ class Agent5 extends Agent {
 
     @Override
     public boolean capture(Target target) {
+        // Increment steps taken
+        stepsTaken++;
+
         // Find the node(s) with the highest belief and the most unvisited neighbors
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -43,9 +48,12 @@ class Agent5 extends Agent {
         visitedNodes.add(examinedNode);
 
         // Update belief state based on the result of examining the node
-        if (target.getCurrentNode() == examinedNode) {
+        boolean captured = target.getCurrentNode() == examinedNode;
+        if (captured) {
             Arrays.fill(beliefState, 0);
             beliefState[examinedNode] = 1;
+            // Increment successful captures
+            successfulCaptures++;
             return true;
         } else {
             beliefState[examinedNode] = 0;
@@ -55,5 +63,13 @@ class Agent5 extends Agent {
             }
             return false;
         }
+    }
+
+    public int getStepsTaken() {
+        return stepsTaken;
+    }
+
+    public int getSuccessfulCaptures() {
+        return successfulCaptures;
     }
 }

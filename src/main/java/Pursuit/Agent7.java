@@ -6,6 +6,8 @@ class Agent7 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
     private Set<Integer> visitedNodes = new HashSet<>();
     private Random rand = new Random();
+    private int stepsTaken = 0;
+    private int successfulCaptures = 0;
 
     public Agent7(int startNode) {
         super(startNode);
@@ -15,6 +17,9 @@ class Agent7 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
+        // Increment steps taken
+        stepsTaken++;
+
         // Find the node(s) with the highest belief and the most unvisited neighbors
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -68,6 +73,19 @@ class Agent7 extends Agent {
 
     @Override
     public boolean capture(Target target) {
-        return currentNode == target.getCurrentNode();
+        boolean captured = currentNode == target.getCurrentNode();
+        if (captured) {
+            // Increment successful captures
+            successfulCaptures++;
+        }
+        return captured;
+    }
+
+    public int getStepsTaken() {
+        return stepsTaken;
+    }
+
+    public int getSuccessfulCaptures() {
+        return successfulCaptures;
     }
 }

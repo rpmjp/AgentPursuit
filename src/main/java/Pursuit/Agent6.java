@@ -8,6 +8,8 @@ import java.util.Random;
 class Agent6 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
     private Random rand = new Random();
+    private int stepsTaken = 0;
+    private int successfulCaptures = 0;
 
     public Agent6(int startNode) {
         super(startNode);
@@ -16,6 +18,9 @@ class Agent6 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
+        // Increment steps taken
+        stepsTaken++;
+
         // Find the node(s) with the highest belief
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -62,6 +67,19 @@ class Agent6 extends Agent {
 
     @Override
     public boolean capture(Target target) {
-        return currentNode == target.getCurrentNode();
+        boolean captured = currentNode == target.getCurrentNode();
+        if (captured) {
+            // Increment successful captures
+            successfulCaptures++;
+        }
+        return captured;
+    }
+
+    public int getStepsTaken() {
+        return stepsTaken;
+    }
+
+    public int getSuccessfulCaptures() {
+        return successfulCaptures;
     }
 }

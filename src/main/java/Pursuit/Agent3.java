@@ -6,6 +6,8 @@ class Agent3 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
     private int examinedNode;
     private Environment env;
+    private int stepsTaken = 0;
+    private int successfulCaptures = 0;
 
     public Agent3(Environment env, int startNode, int examinedNode) {
         super(startNode);
@@ -21,10 +23,16 @@ class Agent3 extends Agent {
 
     @Override
     public boolean capture(Target target) {
+        // Increment steps taken
+        stepsTaken++;
+
         // Update belief state based on the result of examining the node
-        if (target.getCurrentNode() == examinedNode) {
+        boolean captured = target.getCurrentNode() == examinedNode;
+        if (captured) {
             Arrays.fill(beliefState, 0);
             beliefState[examinedNode] = 1;
+            // Increment successful captures
+            successfulCaptures++;
             return true;
         } else {
             beliefState[examinedNode] = 0;
@@ -34,5 +42,13 @@ class Agent3 extends Agent {
             }
             return false;
         }
+    }
+
+    public int getStepsTaken() {
+        return stepsTaken;
+    }
+
+    public int getSuccessfulCaptures() {
+        return successfulCaptures;
     }
 }

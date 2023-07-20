@@ -36,19 +36,17 @@ class Agent7 extends Agent {
             }
         }
 
-        // Examine a random node from the best nodes
-        int examinedNode = bestNodes.get(rand.nextInt(bestNodes.size()));
-        visitedNodes.add(examinedNode);
+        // Examine a random node from the best nodes if available
+        if (!bestNodes.isEmpty()) {
+            int examinedNode = bestNodes.get(rand.nextInt(bestNodes.size()));
+            visitedNodes.add(examinedNode);
 
-        // Update belief state based on the result of examining the node
-        if (target.getCurrentNode() == examinedNode) {
-            Arrays.fill(beliefState, 0);
-            beliefState[examinedNode] = 1;
-        } else {
-            beliefState[examinedNode] = 0;
-            // Update belief state based on the known movement of the target
-            for (int neighbor : env.getNeighbors(examinedNode)) {
-                beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
+            // Update belief state based on the result of examining the node
+            if (target.getCurrentNode() == examinedNode) {
+                Arrays.fill(beliefState, 0);
+                beliefState[examinedNode] = 1;
+            } else {
+                updateBeliefState(env, examinedNode);
             }
         }
 
@@ -68,8 +66,11 @@ class Agent7 extends Agent {
                 bestNodes.add(neighbor);
             }
         }
-        currentNode = bestNodes.get(rand.nextInt(bestNodes.size()));
+        if (!bestNodes.isEmpty()) {
+            currentNode = bestNodes.get(rand.nextInt(bestNodes.size()));
+        }
     }
+
 
     @Override
     public boolean capture(Target target) {
@@ -87,5 +88,24 @@ class Agent7 extends Agent {
 
     public int getSuccessfulCaptures() {
         return successfulCaptures;
+    }
+
+    private void updateBeliefState(Environment env, int examinedNode) {
+        // Calculate the likelihoods based on the known movement of the target
+        double[] likelihoods = new double[41];
+        for (int i = 1; i <= 40; i++) {
+            likelihoods[i] = env.getNeighbors(i).contains(examinedNode) ? 1.0 / env.getNeighbors(i).size() : 0;
+        }
+
+        // Calculate the denominator for normalization
+        double denominator = 0;
+        for (int i = 1; i <= 40; i++) {
+            denominator += beliefState[i] * likelihoods[i];
+        }
+
+        // Calculate the posterior probabilities using Bayes' theorem
+        for (int i = 1; i <= 40; i++) {
+            beliefState[i] = (beliefState[i] * likelihoods[i]) / denominator;
+        }
     }
 }

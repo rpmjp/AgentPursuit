@@ -7,8 +7,12 @@ class Target {
     private Random rand = new Random();
     private int stepsTaken = 0; // Add a step counter
 
-    public Target(Environment env, int startNode) {
+    private Environment environment; // The environment in which the target is moving
+
+    public Target(Environment environment, int startNode) {
         this.currentNode = startNode;
+        this.environment = environment;
+
     }
 
     public void move(Environment env) {
@@ -23,5 +27,9 @@ class Target {
 
     public int getStepsTaken() { // Add a getter for the step counter
         return stepsTaken;
+    }
+
+    public Environment getEnvironment() {
+        return environment;
     }
 }

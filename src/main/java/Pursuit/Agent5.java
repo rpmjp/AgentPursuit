@@ -19,14 +19,6 @@ class Agent5 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
-        // Agent 5 does not move
-    }
-
-    @Override
-    public boolean capture(Target target) {
-        // Increment steps taken
-        stepsTaken++;
-
         // Find the node(s) with the highest belief and the most unvisited neighbors
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -48,21 +40,25 @@ class Agent5 extends Agent {
         visitedNodes.add(examinedNode);
 
         // Update belief state based on the result of examining the node
-        boolean captured = target.getCurrentNode() == examinedNode;
+        beliefState[examinedNode] = 0;
+        // Update belief state based on the known movement of the target
+        for (int neighbor : env.getNeighbors(examinedNode)) {
+            beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
+        }
+        stepsTaken++;
+    }
+
+    @Override
+    public boolean capture(Target target) {
+        boolean captured = currentNode == target.getCurrentNode();
         if (captured) {
-            Arrays.fill(beliefState, 0);
-            beliefState[examinedNode] = 1;
             // Increment successful captures
             successfulCaptures++;
-            return true;
-        } else {
-            beliefState[examinedNode] = 0;
-            // Update belief state based on the known movement of the target
-            for (int neighbor : env.getNeighbors(examinedNode)) {
-                beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
-            }
-            return false;
+            // Reset belief state to capture the target
+            Arrays.fill(beliefState, 0);
+            beliefState[target.getCurrentNode()] = 1;
         }
+        return captured;
     }
 
     public int getStepsTaken() {
@@ -73,3 +69,4 @@ class Agent5 extends Agent {
         return successfulCaptures;
     }
 }
+

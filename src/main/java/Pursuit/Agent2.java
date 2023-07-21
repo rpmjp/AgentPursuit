@@ -58,4 +58,7 @@ class Agent2 extends Agent {
     public int getSuccessfulCaptures() {
         return successfulCaptures;
     }
+    public int getCurrentNode() {
+        return currentNode;
+    }
 }

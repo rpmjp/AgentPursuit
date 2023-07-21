@@ -32,6 +32,6 @@ class Environment {
     }
 
     public List<Integer> getNeighbors(int node) {
-        return graph.get(node);
+        return graph.getOrDefault(node, new ArrayList<>());
     }
 }

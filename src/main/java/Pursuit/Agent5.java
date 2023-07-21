@@ -19,6 +19,19 @@ class Agent5 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
+        // Update belief state based on the known movement of the target
+        int targetNode = target.getCurrentNode();
+        for (int i = 1; i <= 40; i++) {
+            double transitionProb = (i == targetNode) ? 0.8 : 0.2 / 39;
+            beliefState[i] = transitionProb * beliefState[i];
+        }
+
+        // Normalize belief state
+        double totalBelief = Arrays.stream(beliefState).sum();
+        for (int i = 1; i <= 40; i++) {
+            beliefState[i] /= totalBelief;
+        }
+
         // Find the node(s) with the highest belief and the most unvisited neighbors
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -50,7 +63,8 @@ class Agent5 extends Agent {
 
     @Override
     public boolean capture(Target target) {
-        boolean captured = currentNode == target.getCurrentNode();
+        // Check if the agent captures the target
+        boolean captured = getCurrentNode() == target.getCurrentNode();
         if (captured) {
             // Increment successful captures
             successfulCaptures++;
@@ -68,5 +82,7 @@ class Agent5 extends Agent {
     public int getSuccessfulCaptures() {
         return successfulCaptures;
     }
+    public int getCurrentNode() {
+        return currentNode;
+    }
 }
-

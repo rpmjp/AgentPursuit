@@ -20,8 +20,26 @@ class Agent4 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
-        // Agent 4 does not move
+        // Increment steps taken
+        stepsTaken++;
+
+        // Find the node(s) with the highest belief
+        List<Integer> bestNodes = new ArrayList<>();
+        double maxBelief = 0;
+        for (int i = 1; i <= 40; i++) {
+            if (beliefState[i] > maxBelief) {
+                bestNodes.clear();
+                bestNodes.add(i);
+                maxBelief = beliefState[i];
+            } else if (beliefState[i] == maxBelief) {
+                bestNodes.add(i);
+            }
+        }
+
+        // Move to a random node with the highest belief
+        currentNode = bestNodes.get(rand.nextInt(bestNodes.size()));
     }
+
 
     @Override
     public boolean capture(Target target) {

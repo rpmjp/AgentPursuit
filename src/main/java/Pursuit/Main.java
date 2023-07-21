@@ -11,6 +11,7 @@ public class Main {
 
         // Initialize the agents
         List<Agent> agents = new ArrayList<>();
+        agents.add(new Agent0(new Random().nextInt(40) + 1));
         agents.add(new Agent1(new Random().nextInt(40) + 1));
         agents.add(new Agent2(new Random().nextInt(40) + 1));
         agents.add(new Agent3(env, new Random().nextInt(40) + 1, new Random().nextInt(40) + 1));
@@ -70,7 +71,7 @@ public class Main {
 
         // Print the results
         for (int i = 0; i < agents.size(); i++) {
-            System.out.println("Agent" + (i + 1) + " Average Steps: " + avgSteps[i] +
+            System.out.println("Agent" + (i) + " Average Steps: " + avgSteps[i] +
                     " (Average Captures: " + avgCaptures[i] + ")");
         }
     }

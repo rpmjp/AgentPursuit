@@ -5,6 +5,7 @@ abstract class Agent {
     protected int stepsTaken = 0;
     protected int successfulCaptures = 0;
 
+    //Agent constructor
     public Agent(int startNode) {
         this.currentNode = startNode;
     }

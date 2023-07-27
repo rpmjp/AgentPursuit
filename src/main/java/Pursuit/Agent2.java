@@ -42,7 +42,7 @@ class Agent2 extends Agent {
             }
         }
 
-        // Move to the next node
+        // Move to the next nodes
         currentNode = nextNode;
     }
 

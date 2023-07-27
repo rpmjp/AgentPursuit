@@ -23,7 +23,7 @@ class Agent3 extends Agent {
 
     @Override
     public boolean capture(Target target) {
-        // Increment steps taken
+        // Increment steps taken to capture
         stepsTaken++;
 
         // Update belief state based on the result of examining the node

@@ -3,7 +3,7 @@ package Pursuit;
 import java.util.*;
 
 class Agent5 extends Agent {
-    private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
+    private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40.
     private Set<Integer> visitedNodes = new HashSet<>();
     private Random rand = new Random();
     private Environment env;

@@ -9,7 +9,7 @@ public class Main {
         // Initialize the environment with 40 nodes
         Environment env = new Environment();
 
-        // Initialize the agents
+        // Initialize the agent
         List<Agent> agents = new ArrayList<>();
         agents.add(new Agent0(new Random().nextInt(40) + 1));
         agents.add(new Agent1(new Random().nextInt(40) + 1));

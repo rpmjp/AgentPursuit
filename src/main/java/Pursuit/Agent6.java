@@ -21,6 +21,21 @@ class Agent6 extends Agent {
         // Increment steps taken
         stepsTaken++;
 
+        updateBeliefStateAndBestMove(env, target);
+    }
+
+    public void updateBeliefStateAndBestMove(Environment env, Target target) {
+        // Examine a random node with the highest belief
+        int examinedNode = examineNode();
+
+        // Update belief state based on the result of examining the node
+        updateBeliefState(env, target, examinedNode);
+
+        // Move to reduce the distance to the node with the highest belief
+        bestMove(env);
+    }
+
+    public int examineNode() {
         // Find the node(s) with the highest belief
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -34,10 +49,11 @@ class Agent6 extends Agent {
             }
         }
 
-        // Examine a random node with the highest belief
-        int examinedNode = bestNodes.get(rand.nextInt(bestNodes.size()));
+        // Return a random node with the highest belief
+        return bestNodes.get(rand.nextInt(bestNodes.size()));
+    }
 
-        // Update belief state based on the result of examining the node
+    public void updateBeliefState(Environment env, Target target, int examinedNode) {
         if (target.getCurrentNode() == examinedNode) {
             Arrays.fill(beliefState, 0);
             beliefState[examinedNode] = 1;
@@ -48,12 +64,13 @@ class Agent6 extends Agent {
                 beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
             }
         }
+    }
 
-        // Move to reduce the distance to the node with the highest belief
-        List<Integer> neighbors = env.getNeighbors(currentNode);
-        bestNodes.clear();
-        maxBelief = 0;
-        for (int neighbor : neighbors) {
+    public void bestMove(Environment env) {
+        // Find the node(s) with the highest belief
+        List<Integer> bestNodes = new ArrayList<>();
+        double maxBelief = 0;
+        for (int neighbor : env.getNeighbors(currentNode)) {
             if (beliefState[neighbor] > maxBelief) {
                 bestNodes.clear();
                 bestNodes.add(neighbor);
@@ -62,6 +79,8 @@ class Agent6 extends Agent {
                 bestNodes.add(neighbor);
             }
         }
+
+        // Move to a random node with the highest belief
         currentNode = bestNodes.get(rand.nextInt(bestNodes.size()));
     }
 

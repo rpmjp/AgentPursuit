@@ -5,7 +5,7 @@ import java.util.*;
 class Target {
     private int currentNode;
     private Random rand = new Random();
-    private int stepsTaken = 0; // Add a step counter
+    private int stepsTaken = 0; // Add step counter
 
     private Environment environment; // The environment in which the target is moving
 

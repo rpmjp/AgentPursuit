@@ -11,7 +11,7 @@ class Environment {
             addEdge(i, i % 40 + 1);
         }
 
-        // Add 10 additional edges
+        // Add ten additional edges
         Random rand = new Random();
         int addedEdges = 0;
         while (addedEdges < 10) {

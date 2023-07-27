@@ -1,13 +1,12 @@
 package Pursuit;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 class Agent1 extends Agent {
     private Random rand = new Random();
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
+    private Environment env;
 
     public Agent1(int startNode) {
         super(startNode);
@@ -15,25 +14,14 @@ class Agent1 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
+        this.env = env;
         // Increment steps taken
         stepsTaken++;
 
-        List<Integer> neighbors = env.getNeighbors(currentNode);
-        List<Integer> bestNeighbors = new ArrayList<>();
-        int minDistance = Integer.MAX_VALUE;
-
-        for (int neighbor : neighbors) {
-            int distance = Math.abs(neighbor - target.getCurrentNode());
-            if (distance < minDistance) {
-                bestNeighbors.clear();
-                bestNeighbors.add(neighbor);
-                minDistance = distance;
-            } else if (distance == minDistance) {
-                bestNeighbors.add(neighbor);
-            }
+        List<Integer> shortestPath = findShortestPath(currentNode, target.getCurrentNode());
+        if (shortestPath.size() > 1) {
+            currentNode = shortestPath.get(1); // get the next node in the path
         }
-
-        currentNode = bestNeighbors.get(rand.nextInt(bestNeighbors.size()));
     }
 
     @Override
@@ -52,5 +40,33 @@ class Agent1 extends Agent {
 
     public int getSuccessfulCaptures() {
         return successfulCaptures;
+    }
+
+    private List<Integer> findShortestPath(int startNode, int targetNode) {
+        Queue<List<Integer>> queue = new LinkedList<>();
+        Set<Integer> visited = new HashSet<>();
+        queue.offer(new ArrayList<>(Collections.singletonList(startNode)));
+        visited.add(startNode);
+
+        while (!queue.isEmpty()) {
+            List<Integer> path = queue.poll();
+            int currentNode = path.get(path.size() - 1);
+
+            if (currentNode == targetNode) {
+                return path;
+            }
+
+            for (int neighbor : env.getNeighbors(currentNode)) {
+                if (!visited.contains(neighbor)) {
+                    List<Integer> newPath = new ArrayList<>(path);
+                    newPath.add(neighbor);
+                    queue.offer(newPath);
+                    visited.add(neighbor);
+                }
+            }
+        }
+
+        // return an empty list, if there is no path
+        return new ArrayList<>();
     }
 }

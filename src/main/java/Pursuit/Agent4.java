@@ -23,6 +23,11 @@ class Agent4 extends Agent {
         // Increment steps taken
         stepsTaken++;
 
+        // Move to a random node with the highest belief
+        currentNode = bestMove();
+    }
+
+    public int bestMove() {
         // Find the node(s) with the highest belief
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -36,44 +41,27 @@ class Agent4 extends Agent {
             }
         }
 
-        // Move to a random node with the highest belief
-        currentNode = bestNodes.get(rand.nextInt(bestNodes.size()));
+        // Return a random node with the highest belief
+        return bestNodes.get(rand.nextInt(bestNodes.size()));
     }
-
 
     @Override
     public boolean capture(Target target) {
         // Increment steps taken
         stepsTaken++;
 
-        // Find the node(s) with the highest belief
-        List<Integer> bestNodes = new ArrayList<>();
-        double maxBelief = 0;
-        for (int i = 1; i <= 40; i++) {
-            if (beliefState[i] > maxBelief) {
-                bestNodes.clear();
-                bestNodes.add(i);
-                maxBelief = beliefState[i];
-            } else if (beliefState[i] == maxBelief) {
-                bestNodes.add(i);
-            }
-        }
-
-        // Examine a random node with the highest belief
-        int examinedNode = bestNodes.get(rand.nextInt(bestNodes.size()));
-
         // Update belief state based on the result of examining the node
-        boolean captured = target.getCurrentNode() == examinedNode;
+        boolean captured = target.getCurrentNode() == currentNode;
         if (captured) {
             Arrays.fill(beliefState, 0);
-            beliefState[examinedNode] = 1;
+            beliefState[currentNode] = 1;
             // Increment successful captures
             successfulCaptures++;
             return true;
         } else {
-            beliefState[examinedNode] = 0;
+            beliefState[currentNode] = 0;
             // Update belief state based on the known movement of the target
-            for (int neighbor : env.getNeighbors(examinedNode)) {
+            for (int neighbor : env.getNeighbors(currentNode)) {
                 beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
             }
             return false;

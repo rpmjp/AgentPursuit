@@ -12,7 +12,7 @@ class Agent0 extends Agent {
     public void move(Environment env, Target target) {
         // Increment steps taken
         stepsTaken++;
-        // Agent 0 does not move
+        // note Agent 0 does not move
     }
 
     @Override

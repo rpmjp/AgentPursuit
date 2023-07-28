@@ -1,6 +1,7 @@
 package Pursuit;
 
 import java.util.Arrays;
+import java.util.Random;
 
 class Agent3 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
@@ -8,6 +9,7 @@ class Agent3 extends Agent {
     private Environment env;
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
+    private Random rand; // Add a Random object
 
     public Agent3(Environment env, int startNode, int examinedNode) {
         super(startNode);

@@ -14,15 +14,32 @@ class Agent1 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
-        this.env = env;
         // Increment steps taken
         stepsTaken++;
 
-        List<Integer> shortestPath = findShortestPath(currentNode, target.getCurrentNode());
+        List<Integer> shortestPath = findShortestPath(currentNode, target.getCurrentNode(), env);
         if (shortestPath.size() > 1) {
-            currentNode = shortestPath.get(1); // get the next node in the path
+            // 70% of the time, choose the next node in the shortest path
+            if (rand.nextDouble() < 0.7) {
+                currentNode = shortestPath.get(1); // get the next node in the path
+            } else {
+                // 30% of the time, choose a random neighbor that is closer to the target
+                List<Integer> closerNeighbors = new ArrayList<>();
+                for (int neighbor : env.getNeighbors(currentNode)) {
+                    if (Math.abs(neighbor - target.getCurrentNode()) < Math.abs(currentNode - target.getCurrentNode())) {
+                        closerNeighbors.add(neighbor);
+                    }
+                }
+                if (!closerNeighbors.isEmpty()) {
+                    currentNode = closerNeighbors.get(rand.nextInt(closerNeighbors.size()));
+                } else {
+                    currentNode = shortestPath.get(1); // if no closer neighbors, follow the shortest path
+                }
+            }
         }
     }
+
+
 
     @Override
     public boolean capture(Target target) {
@@ -42,7 +59,7 @@ class Agent1 extends Agent {
         return successfulCaptures;
     }
 
-    private List<Integer> findShortestPath(int startNode, int targetNode) {
+    private List<Integer> findShortestPath(int startNode, int targetNode, Environment env) {
         Queue<List<Integer>> queue = new LinkedList<>();
         Set<Integer> visited = new HashSet<>();
         queue.offer(new ArrayList<>(Collections.singletonList(startNode)));

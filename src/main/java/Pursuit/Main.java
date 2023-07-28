@@ -4,12 +4,12 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        int numTrials = 100; // Number of trials to run for each agent
+        int numTrials = 50; // Number of trials to run for each agent
 
         // Initialize the environment with 40 nodes
         Environment env = new Environment();
 
-        // Initialize the agent
+        // Initialize the agents
         List<Agent> agents = new ArrayList<>();
         agents.add(new Agent0(new Random().nextInt(40) + 1));
         agents.add(new Agent1(new Random().nextInt(40) + 1));
@@ -21,58 +21,48 @@ public class Main {
         agents.add(new Agent7(new Random().nextInt(40) + 1));
 
         // Arrays to store the total steps and captures for each agent across all trials
-        int[][] totalSteps = new int[agents.size()][numTrials];
-        int[][] totalCaptures = new int[agents.size()][numTrials];
+        int[] totalSteps = new int[numTrials];
+        int totalCaptures;
 
-        // Run trials
-        for (int trial = 0; trial < numTrials; trial++) {
-            // Reset the environment for a new trial
-            env = new Environment();
+        // Run trials for each agent individually
+        for (Agent agent : agents) {
+            totalCaptures = 0;
+            for (int trial = 0; trial < numTrials; trial++) {
+                // Reset the environment for a new trial
+                env = new Environment();
 
-            // Run the simulation until the target is captured
-            boolean gameOver = false;
-            while (!gameOver) {
-                // Move the target
-                Target target = new Target(env, new Random().nextInt(40) + 1);
-                target.move(env);
+                // Run the simulation until the target is captured
+                boolean gameOver = false;
+                while (!gameOver) {
+                    // Move the target
+                    Target target = new Target(env, new Random().nextInt(40) + 1);
+                    target.move(env);
 
-                // Move each agent and check if it captures the target
-                for (int i = 0; i < agents.size(); i++) {
-                    if (!agents.get(i).capture(target)) {
-                        agents.get(i).move(env, target);
-                        agents.get(i).incrementStepsTaken();
+                    // Move the agent and check if it captures the target
+                    if (!agent.capture(target)) {
+                        agent.move(env, target);
+                        agent.incrementStepsTaken();
                     } else {
-                        totalCaptures[i][trial]++;
+                        totalCaptures++;
                     }
-                }
 
-                // Check if any agent captured the target
-                for (int i = 0; i < agents.size(); i++) {
-                    if (agents.get(i).capture(target)) {
+                    // Check if the agent captured the target
+                    if (agent.capture(target)) {
                         gameOver = true;
-                        break;
                     }
                 }
+
+                // Record the number of steps taken for the agent in this trial
+                totalSteps[trial] = agent.getStepsTaken();
             }
 
-            // Record the number of steps taken for each agent in this trial
-            for (int i = 0; i < agents.size(); i++) {
-                totalSteps[i][trial] = agents.get(i).getStepsTaken();
-            }
-        }
+            // Calculate the average number of steps taken and captures for the agent across all trials
+            double avgSteps = Arrays.stream(totalSteps).average().orElse(0);
+            double capturePercentage = (double) totalCaptures / numTrials * 100;
 
-        // Calculate the average number of steps taken for each agent across all trials
-        double[] avgSteps = new double[agents.size()];
-        double[] avgCaptures = new double[agents.size()];
-        for (int i = 0; i < agents.size(); i++) {
-            avgSteps[i] = Arrays.stream(totalSteps[i]).average().orElse(0);
-            avgCaptures[i] = Arrays.stream(totalCaptures[i]).average().orElse(0);
-        }
-
-        // Print the results
-        for (int i = 0; i < agents.size(); i++) {
-            System.out.println("Agent" + (i) + " Average Steps: " + avgSteps[i] +
-                    " (Average Captures: " + avgCaptures[i] + ")");
+            // Print the results
+            System.out.println(agent.getClass().getSimpleName() + " Average Steps: " + avgSteps +
+                    " (Capture Percentage: " + capturePercentage + "%)");
         }
     }
 }

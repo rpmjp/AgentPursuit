@@ -29,7 +29,7 @@ class Agent6 extends Agent {
         updateBeliefState(env, target, examinedNode);
 
         // Move to reduce the distance to the node with the highest belief
-        int nextNode = bestMove(env);
+        int nextNode = bestMove(env, examinedNode);
         if (nextNode != currentNode) {
             stepsTaken++;
             currentNode = nextNode;
@@ -67,22 +67,20 @@ class Agent6 extends Agent {
         }
     }
 
-    public int bestMove(Environment env) {
-        // Find the node(s) with the highest belief
-        List<Integer> bestNodes = new ArrayList<>();
-        double maxBelief = 0;
-        for (int neighbor : env.getNeighbors(currentNode)) {
-            if (beliefState[neighbor] > maxBelief) {
-                bestNodes.clear();
-                bestNodes.add(neighbor);
-                maxBelief = beliefState[neighbor];
-            } else if (beliefState[neighbor] == maxBelief) {
-                bestNodes.add(neighbor);
+    public int bestMove(Environment env, int examinedNode) {
+        // Find the adjacent node that reduces the distance to the examined node
+        List<Integer> neighbors = env.getNeighbors(currentNode);
+        int bestNode = currentNode; // Stay in the current node if no better option
+        int currentDistance = Math.abs(currentNode - examinedNode);
+        for (int neighbor : neighbors) {
+            int newDistance = Math.abs(neighbor - examinedNode);
+            if (newDistance < currentDistance) {
+                bestNode = neighbor;
+                currentDistance = newDistance;
             }
         }
 
-        // Return a random node with the highest belief
-        return bestNodes.get(rand.nextInt(bestNodes.size()));
+        return bestNode;
     }
 
     @Override

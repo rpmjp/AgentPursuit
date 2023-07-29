@@ -6,13 +6,11 @@ class Agent5 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40.
     private Set<Integer> visitedNodes = new HashSet<>();
     private Random rand = new Random();
-    private Environment env;
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
 
-    public Agent5(Environment env, int startNode) {
+    public Agent5(int startNode) {
         super(startNode);
-        this.env = env;  // Assign the passed environment to the field
         visitedNodes.add(startNode);
         Arrays.fill(beliefState, 1.0 / 40); // Initially, the target is equally likely to be in any node
     }
@@ -32,33 +30,57 @@ class Agent5 extends Agent {
             beliefState[i] /= totalBelief;
         }
 
-        // Find the node(s) with the highest belief and the most unvisited neighbors
-        List<Integer> bestNodes = new ArrayList<>();
-        double maxBelief = 0;
-        int maxUnvisitedNeighbors = 0;
-        for (int i = 1; i <= 40; i++) {
-            int unvisitedNeighbors = (int) env.getNeighbors(i).stream().filter(n -> !visitedNodes.contains(n)).count();
-            if (beliefState[i] > maxBelief || (beliefState[i] == maxBelief && unvisitedNeighbors > maxUnvisitedNeighbors)) {
-                bestNodes.clear();
-                bestNodes.add(i);
-                maxBelief = beliefState[i];
-                maxUnvisitedNeighbors = unvisitedNeighbors;
-            } else if (beliefState[i] == maxBelief && unvisitedNeighbors == maxUnvisitedNeighbors) {
-                bestNodes.add(i);
-            }
-        }
+        // Find the shortest path to the target using BFS
+        int shortestPathNode = bfsShortestPath(env, currentNode, targetNode);
 
-        // Examine a random node from the best nodes
-        int examinedNode = bestNodes.get(rand.nextInt(bestNodes.size()));
-        visitedNodes.add(examinedNode);
+        // Move to the next node in the shortest path
+        currentNode = shortestPathNode;
 
         // Update belief state based on the result of examining the node
-        beliefState[examinedNode] = 0;
+        beliefState[currentNode] = 0;
         // Update belief state based on the known movement of the target
-        for (int neighbor : env.getNeighbors(examinedNode)) {
+        for (int neighbor : env.getNeighbors(currentNode)) {
             beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
         }
         stepsTaken++;
+    }
+
+    // Helper method to find the shortest path from startNode to targetNode using BFS
+    private int bfsShortestPath(Environment env, int startNode, int targetNode) {
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(startNode);
+
+        // Array to keep track of visited nodes during BFS
+        boolean[] visited = new boolean[41];
+        visited[startNode] = true;
+
+        // Array to keep track of the parent nodes in the shortest path
+        int[] parent = new int[41];
+        Arrays.fill(parent, -1);
+
+        while (!queue.isEmpty()) {
+            int currentNode = queue.poll();
+
+            // If the target node is found, reconstruct the shortest path and return the next node to move
+            if (currentNode == targetNode) {
+                int nextNode = targetNode;
+                while (parent[nextNode] != startNode) {
+                    nextNode = parent[nextNode];
+                }
+                return nextNode;
+            }
+
+            for (int neighbor : env.getNeighbors(currentNode)) {
+                if (!visited[neighbor]) {
+                    queue.add(neighbor);
+                    visited[neighbor] = true;
+                    parent[neighbor] = currentNode;
+                }
+            }
+        }
+
+        // If the target node is not reachable, return the current node
+        return startNode;
     }
 
     @Override
@@ -82,6 +104,12 @@ class Agent5 extends Agent {
     public int getSuccessfulCaptures() {
         return successfulCaptures;
     }
+
+    @Override
+    public Agent reset(int startNode) {
+        return new Agent5(startNode);
+    }
+
     public int getCurrentNode() {
         return currentNode;
     }

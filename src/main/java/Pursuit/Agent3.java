@@ -6,51 +6,43 @@ import java.util.Random;
 class Agent3 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
     private int examinedNode;
-    private Environment env;
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
     private Random rand; // Add a Random object
 
-    public Agent3(Environment env, int startNode, int examinedNode) {
+    public Agent3(int startNode) {
         super(startNode);
-        this.examinedNode = examinedNode;
-        this.env = env;  // Assign the passed environment to the field
+        this.examinedNode = startNode; // Assuming the examined node is the start node
         Arrays.fill(beliefState, 1.0 / 40); // Initially, the target is equally likely to be in any node
     }
 
     @Override
     public void move(Environment env, Target target) {
-        // Agent 3 does not move
+        // Increment steps taken
+        //stepsTaken++;
     }
 
     @Override
     public boolean capture(Target target) {
-        // Increment steps taken to capture
-        stepsTaken++;
-
-        // Update belief state based on the result of examining the node
-        boolean captured = target.getCurrentNode() == examinedNode;
+        boolean captured = currentNode == target.getCurrentNode();
         if (captured) {
-            Arrays.fill(beliefState, 0);
-            beliefState[examinedNode] = 1;
             // Increment successful captures
             successfulCaptures++;
-            return true;
-        } else {
-            beliefState[examinedNode] = 0;
-            // Update belief state based on the known movement of the target
-            for (int neighbor : env.getNeighbors(examinedNode)) {
-                beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
-            }
-            return false;
         }
+        return captured;
     }
 
+    @Override
     public int getStepsTaken() {
         return stepsTaken;
     }
 
     public int getSuccessfulCaptures() {
         return successfulCaptures;
+    }
+
+    @Override
+    public Agent3 reset(int startNode) {
+        return new Agent3(startNode);
     }
 }

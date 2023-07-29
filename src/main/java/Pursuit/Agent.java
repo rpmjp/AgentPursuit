@@ -22,11 +22,11 @@ abstract class Agent {
         this.successfulCaptures++;
     }
 
-    public int getStepsTaken() {
-        return this.stepsTaken;
-    }
+    public abstract int getStepsTaken(); // Changed return type to int
 
     public int getSuccessfulCaptures() {
         return this.successfulCaptures;
     }
+
+    public abstract Agent reset(int startNode);
 }

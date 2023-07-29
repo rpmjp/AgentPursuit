@@ -18,9 +18,6 @@ class Agent6 extends Agent {
 
     @Override
     public void move(Environment env, Target target) {
-        // Increment steps taken
-        stepsTaken++;
-
         updateBeliefStateAndBestMove(env, target);
     }
 
@@ -32,7 +29,11 @@ class Agent6 extends Agent {
         updateBeliefState(env, target, examinedNode);
 
         // Move to reduce the distance to the node with the highest belief
-        bestMove(env);
+        int nextNode = bestMove(env);
+        if (nextNode != currentNode) {
+            stepsTaken++;
+            currentNode = nextNode;
+        }
     }
 
     public int examineNode() {
@@ -66,7 +67,7 @@ class Agent6 extends Agent {
         }
     }
 
-    public void bestMove(Environment env) {
+    public int bestMove(Environment env) {
         // Find the node(s) with the highest belief
         List<Integer> bestNodes = new ArrayList<>();
         double maxBelief = 0;
@@ -80,8 +81,8 @@ class Agent6 extends Agent {
             }
         }
 
-        // Move to a random node with the highest belief
-        currentNode = bestNodes.get(rand.nextInt(bestNodes.size()));
+        // Return a random node with the highest belief
+        return bestNodes.get(rand.nextInt(bestNodes.size()));
     }
 
     @Override
@@ -94,11 +95,17 @@ class Agent6 extends Agent {
         return captured;
     }
 
+    @Override
     public int getStepsTaken() {
         return stepsTaken;
     }
 
     public int getSuccessfulCaptures() {
         return successfulCaptures;
+    }
+
+    @Override
+    public Agent6 reset(int startNode) {
+        return new Agent6(startNode);
     }
 }

@@ -3,10 +3,10 @@ package Pursuit;
 import java.util.*;
 
 class Agent1 extends Agent {
-    private Random rand = new Random();
+    private Environment environment; // Add a class member to store the Environment instance
+
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
-    private Environment env;
 
     public Agent1(int startNode) {
         super(startNode);
@@ -17,33 +17,17 @@ class Agent1 extends Agent {
         // Increment steps taken
         stepsTaken++;
 
-        List<Integer> shortestPath = findShortestPath(currentNode, target.getCurrentNode(), env);
-        if (shortestPath.size() > 1) {
-            // 70% of the time, choose the next node in the shortest path
-            if (rand.nextDouble() < 0.7) {
-                currentNode = shortestPath.get(1); // get the next node in the path
-            } else {
-                // 30% of the time, choose a random neighbor that is closer to the target
-                List<Integer> closerNeighbors = new ArrayList<>();
-                for (int neighbor : env.getNeighbors(currentNode)) {
-                    if (Math.abs(neighbor - target.getCurrentNode()) < Math.abs(currentNode - target.getCurrentNode())) {
-                        closerNeighbors.add(neighbor);
-                    }
-                }
-                if (!closerNeighbors.isEmpty()) {
-                    currentNode = closerNeighbors.get(rand.nextInt(closerNeighbors.size()));
-                } else {
-                    currentNode = shortestPath.get(1); // if no closer neighbors, follow the shortest path
-                }
-            }
-        }
+        // Calculate the best neighboring node closest to the target
+        int nextNode = calculateBestNextNode(env, target.getCurrentNode());
+
+        // Move to the calculated neighboring node
+        currentNode = nextNode;
     }
-
-
 
     @Override
     public boolean capture(Target target) {
-        boolean captured = currentNode == target.getCurrentNode();
+        // Check if the agent captures the target
+        boolean captured = getCurrentNode() == target.getCurrentNode();
         if (captured) {
             // Increment successful captures
             successfulCaptures++;
@@ -51,6 +35,7 @@ class Agent1 extends Agent {
         return captured;
     }
 
+    @Override
     public int getStepsTaken() {
         return stepsTaken;
     }
@@ -59,31 +44,32 @@ class Agent1 extends Agent {
         return successfulCaptures;
     }
 
-    private List<Integer> findShortestPath(int startNode, int targetNode, Environment env) {
-        Queue<List<Integer>> queue = new LinkedList<>();
-        Set<Integer> visited = new HashSet<>();
-        queue.offer(new ArrayList<>(Collections.singletonList(startNode)));
-        visited.add(startNode);
+    public int getCurrentNode() {
+        return currentNode;
+    }
 
-        while (!queue.isEmpty()) {
-            List<Integer> path = queue.poll();
-            int currentNode = path.get(path.size() - 1);
+    private int calculateBestNextNode(Environment env, int targetPosition) {
+        // Find the best neighboring node closest to the target position
+        List<Integer> neighbors = env.getNeighbors(currentNode);
+        int bestNextNode = -1;
+        double minDistance = Double.MAX_VALUE;
 
-            if (currentNode == targetNode) {
-                return path;
-            }
-
-            for (int neighbor : env.getNeighbors(currentNode)) {
-                if (!visited.contains(neighbor)) {
-                    List<Integer> newPath = new ArrayList<>(path);
-                    newPath.add(neighbor);
-                    queue.offer(newPath);
-                    visited.add(neighbor);
-                }
+        for (int neighbor : neighbors) {
+            double distance = distanceToTarget(neighbor, targetPosition);
+            if (distance < minDistance) {
+                minDistance = distance;
+                bestNextNode = neighbor;
             }
         }
+        return bestNextNode;
+    }
 
-        // return an empty list, if there is no path
-        return new ArrayList<>();
+    private double distanceToTarget(int node, int targetPosition) {
+        // Simple distance calculation between two nodes
+        return Math.abs(node - targetPosition);
+    }
+    @Override
+    public Agent1 reset(int startNode) {
+        return new Agent1(startNode);
     }
 }

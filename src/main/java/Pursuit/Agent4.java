@@ -8,18 +8,20 @@ import java.util.Random;
 class Agent4 extends Agent {
     private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
     private Random rand = new Random();
-    private Environment env;
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
+    private Environment env; // Store the Environment object here
 
-    public Agent4(Environment env, int startNode) {
+    public Agent4(int startNode) {
         super(startNode);
-        this.env = env;
         Arrays.fill(beliefState, 1.0 / 40); // Initially, the target is equally likely to be in any node
     }
 
     @Override
     public void move(Environment env, Target target) {
+        // Store the Environment object
+        this.env = env;
+
         // Increment steps taken
         stepsTaken++;
 
@@ -43,12 +45,16 @@ class Agent4 extends Agent {
 
         // Return a random node with the highest belief
         return bestNodes.get(rand.nextInt(bestNodes.size()));
+
     }
 
     @Override
     public boolean capture(Target target) {
+        // Store the Environment object
+        this.env = target.getEnvironment();
+
         // Increment steps taken
-        stepsTaken++;
+        //stepsTaken++;
 
         // Update belief state based on the result of examining the node
         boolean captured = target.getCurrentNode() == currentNode;
@@ -68,11 +74,17 @@ class Agent4 extends Agent {
         }
     }
 
+
+    @Override
     public int getStepsTaken() {
         return stepsTaken;
     }
 
     public int getSuccessfulCaptures() {
         return successfulCaptures;
+    }
+    @Override
+    public Agent4 reset(int startNode) {
+        return new Agent4(startNode);
     }
 }

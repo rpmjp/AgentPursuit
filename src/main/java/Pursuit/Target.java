@@ -13,6 +13,7 @@ class Target {
         this.currentNode = startNode;
         this.environment = environment;
 
+
     }
 
     public void move(Environment env) {

@@ -17,7 +17,7 @@ class Target {
     }
 
     public void move(Environment env) {
-        List<Integer> neighbors = env.getNeighbors(currentNode);
+        List<Integer> neighbors = (List<Integer>) env.getNeighbors(currentNode);
         currentNode = neighbors.get(rand.nextInt(neighbors.size()));
         stepsTaken++; // Increment the step counter every time the target moves
     }

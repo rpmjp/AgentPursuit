@@ -17,7 +17,8 @@ class Environment {
         while (addedEdges < 10) {
             int node1 = rand.nextInt(40) + 1;
             int node2 = rand.nextInt(40) + 1;
-            if (node1 != node2 && !graph.get(node1).contains(node2) && graph.get(node1).size() < 3 && graph.get(node2).size() < 3) {
+            if (node1 != node2 && !graph.get(node1).contains(node2)
+                    && graph.get(node1).size() < 3 && graph.get(node2).size() < 3) {
                 addEdge(node1, node2);
                 addedEdges++;
             }

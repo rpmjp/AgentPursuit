@@ -3,98 +3,72 @@ package Pursuit;
 import java.util.*;
 
 class Agent7 extends Agent {
-    private double[] beliefState = new double[41]; // Assuming nodes are numbered from 1 to 40
+    private final int NUM_PARTICLES = 1000; // Number of particles for the Particle Filter
+    private List<Particle> particles = new ArrayList<>();
     private Random rand = new Random();
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
-    private double[][] transitionMatrix = new double[41][41]; // Add transition matrix
+    private int lastKnownTargetPosition; // Last known position of the target
+
+    // Define HMM transition probabilities
+    private double[][] transitionMatrix = new double[41][41];
+    private int[][] observationCounts = new int[41][41];
+    private double[] beliefState = new double[41]; // Belief state for the target's location
 
     public Agent7(int startNode) {
         super(startNode);
         Arrays.fill(beliefState, 1.0 / 40); // Initially, the target is equally likely to be in any node
+        lastKnownTargetPosition = startNode;
+        initializeParticles();
         initializeTransitionMatrix();
     }
 
     @Override
     public void move(Environment env, Target target) {
-        // Increment steps taken
-
-
-        updateBeliefStateAndBestMove(env, target);
-    }
-
-    public void updateBeliefStateAndBestMove(Environment env, Target target) {
-        // Examine a random node with the highest belief
-        int examinedNode = examineNode();
-
-        // Update belief state based on the result of examining the node
-        updateBeliefState(env, target, examinedNode);
-
-        // Move to reduce the distance to the node with the highest belief
-        bestMove(env);
-    }
-
-    public int examineNode() {
-        // Find the node(s) with the highest belief
-        List<Integer> bestNodes = new ArrayList<>();
-        double maxBelief = 0;
-        for (int i = 1; i <= 40; i++) {
-            if (beliefState[i] > maxBelief) {
-                bestNodes.clear();
-                bestNodes.add(i);
-                maxBelief = beliefState[i];
-            } else if (beliefState[i] == maxBelief) {
-                bestNodes.add(i);
-            }
-        }
-
-        // Return a random node with the highest belief
-        return bestNodes.get(rand.nextInt(bestNodes.size()));
-    }
-
-    public void updateBeliefState(Environment env, Target target, int examinedNode) {
-        if (target.getCurrentNode() == examinedNode) {
-            Arrays.fill(beliefState, 0);
-            beliefState[examinedNode] = 1;
-        } else {
-            beliefState[examinedNode] = 0;
-            // Update belief state based on the known movement of the target
-            for (int neighbor : env.getNeighbors(examinedNode)) {
-                beliefState[neighbor] += 1.0 / env.getNeighbors(neighbor).size();
-            }
-        }
-    }
-
-    public void bestMove(Environment env) {
-        // Find the node(s) with the highest belief
-        List<Integer> bestNodes = new ArrayList<>();
-        double maxBelief = 0;
-        for (int neighbor : env.getNeighbors(currentNode)) {
-            if (beliefState[neighbor] > maxBelief) {
-                bestNodes.clear();
-                bestNodes.add(neighbor);
-                maxBelief = beliefState[neighbor];
-            } else if (beliefState[neighbor] == maxBelief) {
-                bestNodes.add(neighbor);
-            }
-        }
-
-        // Move to a random node with the highest belief
-        currentNode = bestNodes.get(rand.nextInt(bestNodes.size()));
         stepsTaken++;
+        int predictedPosition = predictNextPosition();
+        int examinedNode = getHighestProbabilityNode();
+        if (target.getCurrentNode() == examinedNode) {
+            updateParticles(target.getCurrentNode());
+        } else {
+            updateBeliefState(env, examinedNode);
+        }
+
+        Map<Integer, Integer> prev = new HashMap<>();
+        Map<Integer, Double> dist = new HashMap<>();
+        for (int i = 1; i <= 40; i++) {
+            dist.put(i, Double.MAX_VALUE);
+        }
+        dist.put(currentNode, 0.0);
+
+        PriorityQueue<Integer> queue = new PriorityQueue<>(Comparator.comparingDouble(dist::get));
+        queue.add(currentNode);
+
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            for (int neighbor : env.getNeighbors(node)) {
+                double newDist = dist.get(node) + distanceToTarget(node, neighbor);
+                if (newDist < dist.get(neighbor)) {
+                    dist.put(neighbor, newDist);
+                    prev.put(neighbor, node);
+                    queue.remove(neighbor);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        currentNode = getClosestNeighbor(env, getHighestProbabilityNode());
     }
 
     @Override
     public boolean capture(Target target) {
         boolean captured = currentNode == target.getCurrentNode();
         if (captured) {
-            // Increment successful captures
             successfulCaptures++;
         }
         return captured;
     }
 
-    @Override
     public int getStepsTaken() {
         return stepsTaken;
     }
@@ -103,14 +77,68 @@ class Agent7 extends Agent {
         return successfulCaptures;
     }
 
+    @Override
+    public Agent7 reset(int startNode) {
+        return new Agent7(startNode);
+    }
+
+    private void updateBeliefState(Environment env, int examinedNode) {
+        double[] likelihoods = new double[41];
+        for (int i = 1; i <= 40; i++) {
+            double distance = distanceToTarget(examinedNode, i);
+            likelihoods[i] = 1.0 / (distance + 1);
+        }
+
+        observationCounts[lastKnownTargetPosition][examinedNode]++;
+
+        for (int i = 1; i <= 40; i++) {
+            int totalCount = observationCounts[lastKnownTargetPosition][i];
+            if (totalCount > 0) {
+                transitionMatrix[lastKnownTargetPosition][i] = (double) observationCounts[lastKnownTargetPosition][i] / totalCount;
+            }
+        }
+
+        updateBeliefStateWithHMM(examinedNode);
+        lastKnownTargetPosition = examinedNode;
+    }
+
+    private void updateBeliefStateWithHMM(int examinedNode) {
+        double[] newBeliefState = new double[41];
+        for (int i = 1; i <= 40; i++) {
+            double prob = 0.0;
+            for (int j = 1; j <= 40; j++) {
+                prob += beliefState[j] * transitionMatrix[j][i];
+            }
+            newBeliefState[i] = prob;
+        }
+        beliefState = newBeliefState;
+
+        double totalBelief = Arrays.stream(beliefState).sum();
+        for (int i = 1; i <= 40; i++) {
+            beliefState[i] /= totalBelief;
+        }
+    }
+
+    private int predictNextPosition() {
+        int sumPosition = 0;
+        for (Particle particle : particles) {
+            sumPosition += particle.getPosition();
+        }
+        return sumPosition / NUM_PARTICLES;
+    }
+
+    private double distanceToTarget(int node, int targetPosition) {
+        return Math.abs(node - targetPosition);
+    }
+
     private void initializeTransitionMatrix() {
-        // Initialize the transition matrix based on the graph
+        double initialProb = 0.025;
         for (int i = 1; i <= 40; i++) {
             for (int j = 1; j <= 40; j++) {
                 if (i == j) {
-                    transitionMatrix[i][j] = 0.025;
+                    transitionMatrix[i][j] = initialProb;
                 } else if (Math.abs(i - j) == 1) {
-                    transitionMatrix[i][j] = (1.0 - 0.025) / 3;
+                    transitionMatrix[i][j] = (1.0 - initialProb) / 3;
                 } else {
                     transitionMatrix[i][j] = 0.0;
                 }
@@ -118,8 +146,42 @@ class Agent7 extends Agent {
         }
     }
 
-    @Override
-    public Agent7 reset(int startNode) {
-        return new Agent7(startNode);
+    private void initializeParticles() {
+        for (int i = 0; i < NUM_PARTICLES; i++) {
+            int position = rand.nextInt(40) + 1;
+            particles.add(new Particle(position));
+        }
+    }
+
+    private void updateParticles(int targetPosition) {
+        for (Particle particle : particles) {
+            particle.setPosition(targetPosition);
+        }
+    }
+
+    private int getClosestNeighbor(Environment env, int targetPosition) {
+        List<Integer> neighbors = env.getNeighbors(currentNode);
+        int closestNeighbor = -1;
+        double minDistance = Double.MAX_VALUE;
+        for (int neighbor : neighbors) {
+            double distance = distanceToTarget(neighbor, targetPosition);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestNeighbor = neighbor;
+            }
+        }
+        return closestNeighbor;
+    }
+
+    private int getHighestProbabilityNode() {
+        int highestProbNode = -1;
+        double highestProb = Double.MIN_VALUE;
+        for (int i = 1; i <= 40; i++) {
+            if (beliefState[i] > highestProb) {
+                highestProb = beliefState[i];
+                highestProbNode = i;
+            }
+        }
+        return highestProbNode;
     }
 }

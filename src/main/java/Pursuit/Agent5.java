@@ -106,7 +106,7 @@ class Agent5 extends Agent {
     }
 
     @Override
-    public Agent reset(int startNode) {
+    public Agent5 reset(int startNode) {
         return new Agent5(startNode);
     }
 

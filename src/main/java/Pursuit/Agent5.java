@@ -1,3 +1,14 @@
+/**
+ * Represents an agent that uses belief states and breadth-first search (BFS) to navigate
+ * an environment and capture a target. The agent maintains a belief state for the target's
+ * location and uses BFS to find the shortest path to the target.
+ * <p>
+ * The belief state is updated based on the known movement of the target, and the agent
+ * moves along the shortest path to the target. The agent also keeps track of the number
+ * of steps taken and successful captures.
+ * </p>
+ * @author [Robert Jean Pierre]
+ */
 package Pursuit;
 
 import java.util.*;
@@ -9,12 +20,23 @@ class Agent5 extends Agent {
     private int stepsTaken = 0;
     private int successfulCaptures = 0;
 
+    /**
+     * Constructs an Agent5 with the given starting node.
+     *
+     * @param startNode the starting node of the agent
+     */
     public Agent5(int startNode) {
         super(startNode);
         visitedNodes.add(startNode);
         Arrays.fill(beliefState, 1.0 / 40); // Initially, the target is equally likely to be in any node
     }
 
+    /**
+     * Moves the agent based on the belief state and finds the shortest path to the target using BFS.
+     *
+     * @param env    the environment
+     * @param target the target
+     */
     @Override
     public void move(Environment env, Target target) {
         // Update belief state based on the known movement of the target
@@ -45,6 +67,14 @@ class Agent5 extends Agent {
         stepsTaken++;
     }
 
+    /**
+     * Helper method to find the shortest path from startNode to targetNode using BFS.
+     *
+     * @param env        the environment
+     * @param startNode  the starting node
+     * @param targetNode the target node
+     * @return the next node in the shortest path
+     */
     // Helper method to find the shortest path from startNode to targetNode using BFS
     private int bfsShortestPath(Environment env, int startNode, int targetNode) {
         Queue<Integer> queue = new LinkedList<>();
@@ -83,6 +113,12 @@ class Agent5 extends Agent {
         return startNode;
     }
 
+    /**
+     * Captures the target if the agent's current node matches the target's current node.
+     *
+     * @param target the target
+     * @return true if the target is captured, false otherwise
+     */
     @Override
     public boolean capture(Target target) {
         // Check if the agent captures the target
@@ -97,19 +133,40 @@ class Agent5 extends Agent {
         return captured;
     }
 
+    /**
+     * Returns the number of steps taken by the agent.
+     *
+     * @return the number of steps taken
+     */
     public int getStepsTaken() {
         return stepsTaken;
     }
 
+    /**
+     * Returns the number of successful captures by the agent.
+     *
+     * @return the number of successful captures
+     */
     public int getSuccessfulCaptures() {
         return successfulCaptures;
     }
 
+    /**
+     * Resets the agent with the given starting node.
+     *
+     * @param startNode the starting node for the reset
+     * @return a new Agent5 instance with the given starting node
+     */
     @Override
     public Agent5 reset(int startNode) {
         return new Agent5(startNode);
     }
 
+    /**
+     * Returns the current node of the agent.
+     *
+     * @return the current node
+     */
     public int getCurrentNode() {
         return currentNode;
     }

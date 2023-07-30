@@ -1,3 +1,24 @@
+/**
+ * Main class for running the Pursuit simulation.
+ * <p>
+ * This class initializes and runs a simulation of various agents pursuing a target within an environment.
+ * The simulation is run for a specified number of trials, and the average number of steps taken by each agent
+ * to capture the target is calculated and printed.
+ * </p>
+ * <p>
+ * The simulation includes the following steps:
+ * <ul>
+ *   <li>Initialization of the environment and agents.</li>
+ *   <li>Running trials for each agent individually.</li>
+ *   <li>Resetting the agent for a new trial.</li>
+ *   <li>Moving the target and agent until the target is captured.</li>
+ *   <li>Recording the number of steps taken for the agent in each trial.</li>
+ *   <li>Calculating and printing the average number of steps taken for each agent.</li>
+ * </ul>
+ * </p>
+ *
+ * @author Robert Jean Pierre
+ */
 package Pursuit;
 
 import java.util.*;

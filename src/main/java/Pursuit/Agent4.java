@@ -1,3 +1,16 @@
+/**
+ * Agent4 class representing an agent in the Pursuit simulation.
+ * <p>
+ * This agent maintains a belief state, representing the probability distribution over the possible locations of the target.
+ * The agent moves to a random node with the highest belief and updates its belief state based on the observed environment.
+ * </p>
+ * <p>
+ * The belief state is initialized with equal probability for all nodes, and it is updated based on the result of examining
+ * the current node and the known movement of the target.
+ * </p>
+ *
+ * @author Robert Jean Pierre
+ */
 package Pursuit;
 
 import java.util.ArrayList;
@@ -12,11 +25,22 @@ class Agent4 extends Agent {
     private int successfulCaptures = 0;
     private Environment env; // Store the Environment object here
 
+    /**
+     * Constructs a new Agent4 with the given starting node.
+     *
+     * @param startNode The starting node for the agent.
+     */
     public Agent4(int startNode) {
         super(startNode);
         Arrays.fill(beliefState, 1.0 / 40); // Initially, the target is equally likely to be in any node
     }
 
+    /**
+     * Moves the agent to a random node with the highest belief.
+     *
+     * @param env    The environment in which the agent is moving.
+     * @param target The target that the agent is pursuing.
+     */
     @Override
     public void move(Environment env, Target target) {
         // Store the Environment object
@@ -29,6 +53,11 @@ class Agent4 extends Agent {
         currentNode = bestMove();
     }
 
+    /**
+     * Determines the best move for the agent based on the belief state.
+     *
+     * @return The node with the highest belief.
+     */
     public int bestMove() {
         // Find the node(s) with the highest belief
         List<Integer> bestNodes = new ArrayList<>();
@@ -48,13 +77,16 @@ class Agent4 extends Agent {
 
     }
 
+    /**
+     * Attempts to capture the target and updates the belief state.
+     *
+     * @param target The target that the agent is attempting to capture.
+     * @return True if the target is captured, false otherwise.
+     */
     @Override
     public boolean capture(Target target) {
         // Store the Environment object
         this.env = target.getEnvironment();
-
-        // Increment steps taken
-        //stepsTaken++;
 
         // Update belief state based on the result of examining the node
         boolean captured = target.getCurrentNode() == currentNode;
@@ -74,15 +106,31 @@ class Agent4 extends Agent {
         }
     }
 
-
+    /**
+     * Gets the number of steps taken by the agent.
+     *
+     * @return The number of steps taken.
+     */
     @Override
     public int getStepsTaken() {
         return stepsTaken;
     }
 
+    /**
+     * Gets the number of successful captures by the agent.
+     *
+     * @return The number of successful captures.
+     */
     public int getSuccessfulCaptures() {
         return successfulCaptures;
     }
+
+    /**
+     * Resets the agent to a new starting node.
+     *
+     * @param startNode The new starting node for the agent.
+     * @return A new Agent4 instance with the specified starting node.
+     */
     @Override
     public Agent4 reset(int startNode) {
         return new Agent4(startNode);
